@@ -19,4 +19,15 @@ def create_config():
         print("GhostNotes: Config file is created succesfully")
 
 def update_exclude():
-    pass
+    loc = ".git/info/exclude"
+    
+    with open(loc, 'r') as file:
+        for line in file:
+            # already in exclude
+            if line.strip() == '.ghostnotes':
+                return
+            
+    file = open(loc, "a")
+    file.write('.ghostnotes\n')
+    file.close()
+        
