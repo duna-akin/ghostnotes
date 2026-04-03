@@ -90,3 +90,6 @@ def strip_ghostnotes():
         subprocess.run(
             ['git', 'update-index', '--cacheinfo', f'{mode},{blob_hash},{file}']
         )
+
+if __name__ == "__main__":
+    strip_ghostnotes()
