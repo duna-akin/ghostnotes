@@ -56,9 +56,19 @@ def set_tag(tag):
     config['settings']['tag'] = tag
     with open('.ghostnotes', 'w') as configfile:
         config.write(configfile)
-        
+
     print(f"GhostNotes: Config file tag is set to {tag} succesfully")
 
 # add custom language comment support
 def add_lang_support(extension, notation):
-    pass
+    if not os.path.isfile('.ghostnotes'):
+        print("This project is not initialized with GhostNotes, cannot add new file support.")
+        return
+    
+    config = configparser.ConfigParser()
+    config.read('.ghostnotes')
+    config['languages'][extension] = notation
+    with open('.ghostnotes', 'w') as configfile:
+        config.write(configfile)
+
+    print(f"GhostNotes: Config file language support for {extension} files are added with symbol {notation} successfuly.")
