@@ -17,7 +17,7 @@ def main():
     # add lang
     lang_parser = subparsers.add_parser("add-lang", help="Add a new language support, Check .ghostnotes for the default languages supported")
     lang_parser.add_argument("--ext", required=True, help="File extension (.py, .js, .sql etc.)")
-    lang_parser.add_argument("--not", required=True, help="Notation for commenting in the said language (# for .py, // for .java etc.)")
+    lang_parser.add_argument("--symb", required=True, help="Symbol for commenting in the said language (# for .py, // for .java etc.)")
 
     args = parser.parse_args()
 
@@ -27,6 +27,6 @@ def main():
         install_hook()
         print("GhostNotes is successfully initialized.")
     elif args.command == "set-tag":
-        pass # will call once the appropriate func is implemented
+        set_tag(args.tag)
     elif args.command == "add-lang":
-        pass
+        add_lang_support(args.ext, args.symb)

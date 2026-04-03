@@ -44,3 +44,21 @@ def load_config():
         print("GhostNotes: Config file is read succesfully")
 
         return config
+
+# update tag 
+def set_tag(tag):
+    if not os.path.isfile('.ghostnotes'):
+        print("This project is not initialized with GhostNotes, cannot set new tag.")
+        return
+    
+    config = configparser.ConfigParser()
+    config.read('.ghostnotes')          # preserve existing settings
+    config['settings']['tag'] = tag
+    with open('.ghostnotes', 'w') as configfile:
+        config.write(configfile)
+        
+    print(f"GhostNotes: Config file tag is set to {tag} succesfully")
+
+# add custom language comment support
+def add_lang_support(extension, notation):
+    pass
