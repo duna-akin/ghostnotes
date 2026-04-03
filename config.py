@@ -31,3 +31,16 @@ def update_exclude():
     file.write('.ghostnotes\n')
     file.close()
         
+def load_config():
+    # check if config exists
+    if not os.path.isfile('.ghostnotes'):
+        print("This project is not initialized with GhostNotes.")
+        return
+    
+    else:
+        # set-up the default config
+        config = configparser.ConfigParser()
+        config.read('.ghostnotes')
+        print("GhostNotes: Config file is read succesfully")
+
+        return config
