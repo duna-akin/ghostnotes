@@ -30,3 +30,6 @@ def main():
         set_tag(args.tag)
     elif args.command == "add-lang":
         add_lang_support(args.ext, args.symb)
+
+if __name__ == "__main__":
+    main()
