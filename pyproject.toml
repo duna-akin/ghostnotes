@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Strip personal annotations from code before committing"
 requires-python = ">=3.8"
 license = "MIT"
+authors = [
+    {name = "Tuna Akin", email = "tuna.takin@gmail.com"}
+]
 readme = "README.md"
 
 [project.scripts]
