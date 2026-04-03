@@ -1,7 +1,7 @@
 # CLI setup
 import argparse
-from hook import install_hook, strip_ghostnotes
-from config import create_config, update_exclude, set_tag, add_lang_support
+from ghostnotes.hook import install_hook, strip_ghostnotes
+from ghostnotes.config import create_config, update_exclude, set_tag, add_lang_support
 
 def main():
     parser = argparse.ArgumentParser(description="GhostNotes")

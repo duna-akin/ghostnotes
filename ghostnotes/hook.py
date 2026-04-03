@@ -2,13 +2,12 @@ import os
 import stat
 import subprocess
 from pathlib import Path 
-from config import load_config
+from ghostnotes.config import load_config
 
 # for adding this script to pre-commit
 def install_hook():
     path = '.git/hooks/pre-commit'
-    script_path = os.path.abspath(__file__)
-    command = f'python3 "{script_path}"' 
+    command = 'python3 -m ghostnotes.hook'
 
     # if a pre-commit hook file already exists:
     if os.path.exists(path):
