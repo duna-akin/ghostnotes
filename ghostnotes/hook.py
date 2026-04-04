@@ -83,6 +83,8 @@ def strip_ghostnotes():
             ['git', 'ls-files', '--stage', file],
             capture_output=True, text=True
         )
+        if not ls_result.stdout.strip():
+            continue
         mode = ls_result.stdout.split()[0]
 
         # update the index entry with the new blob

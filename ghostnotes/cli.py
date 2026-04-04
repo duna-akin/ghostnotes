@@ -2,6 +2,7 @@
 import argparse
 from ghostnotes.hook import install_hook, strip_ghostnotes
 from ghostnotes.config import create_config, update_exclude, set_tag, add_lang_support
+from ghostnotes.sync import pull
 
 def main():
     parser = argparse.ArgumentParser(description="GhostNotes")
@@ -19,6 +20,9 @@ def main():
     lang_parser.add_argument("--ext", required=True, help="File extension (.py, .js, .sql etc.)")
     lang_parser.add_argument("--symb", required=True, help="Symbol for commenting in the said language (# for .py, // for .java etc.)")
 
+    # pull
+    pull_parser = subparsers.add_parser("pull", help="Git pull with ghostnote-safe stripping and re-applying")
+
     args = parser.parse_args()
 
     if args.command == "init":
@@ -30,6 +34,8 @@ def main():
         set_tag(args.tag)
     elif args.command == "add-lang":
         add_lang_support(args.ext, args.symb)
+    elif args.command == "pull":
+        pull()
 
 if __name__ == "__main__":
     main()
