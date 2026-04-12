@@ -1,5 +1,5 @@
 # GhostNotes
-**Version:** 0.2.0 | **Last Updated:** April 12, 2026
+**Version:** 0.3.0 | **Last Updated:** April 12, 2026
 
 A Git tool that strips tagged comments before committing.
 
@@ -24,6 +24,7 @@ Your local file stays untouched.
 | Command | Description |
 |---|---|
 | `ghostnotes init` | Initialize GhostNotes in the current project |
+| `ghostnotes status` | Show all GhostNotes in the current project |
 | `ghostnotes set-tag --tag <tag>` | Change the default comment tag |
 | `ghostnotes add-lang --ext <.ext> --symb <symbol>` | Add support for a new language |
 | `ghostnotes pull` | Git pull that safely strips and re-applies your ghostnotes |
