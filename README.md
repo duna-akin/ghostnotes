@@ -1,7 +1,22 @@
 # GhostNotes
-**Version:** 0.3.0 | **Last Updated:** April 12, 2026
+**Version:** 1.0.0 | **Last Updated:** April 12, 2026
 
 A Git tool that strips tagged comments before committing.
+
+---
+
+## Installation
+
+```bash
+pip install ghostnotes
+```
+
+Then initialize in any git repo:
+
+```bash
+cd your-project
+ghostnotes init
+```
 
 ---
 
