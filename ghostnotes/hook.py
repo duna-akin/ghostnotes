@@ -52,8 +52,6 @@ def strip_ghostnotes():
             supported_staged_files.append(f)
 
     # strip lines matching the tag
-
-
     for file in supported_staged_files:
         # check the commenting style for the file type from configuration['languages'] as well as the tag from configuration['settings'] to build the exact sequence of chars we are looking for
         comment = configuration['languages'][Path(file).suffix]
@@ -68,9 +66,14 @@ def strip_ghostnotes():
 
         new_lines = list()
         for line in staged_content.splitlines(keepends=True):
-            # strip
+            # strip only if the pattern is not inside a string literal
             if pattern in line:
-                line = line.split(pattern)[0].rstrip() + '\n'
+                idx = line.index(pattern)
+                prefix = line[:idx]
+                # if an odd number of quotes precede the pattern, it's inside a string
+                in_string = (prefix.count('"') % 2 == 1) or (prefix.count("'") % 2 == 1)
+                if not in_string:
+                    line = line[:idx].rstrip() + '\n'
             new_lines.append(line)
 
         stripped_content = ''.join(new_lines)
