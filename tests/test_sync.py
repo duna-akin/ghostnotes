@@ -23,7 +23,7 @@ def test_extract_notes_finds_ghost_note():
 
     with open("example.py", "w") as f:
         f.write("x = 1\n")
-        f.write("y = 2
+        f.write("y = 2  # GN: remember this\n")
 
     notes = extract_notes()
 
@@ -44,7 +44,7 @@ def test_extract_notes_gets_line_number():
     with open("example.py", "w") as f:
         f.write("x = 1\n")       # line 0
         f.write("y = 2\n")       # line 1
-        f.write("z = 3
+        f.write("z = 3  # GN: note on line 2\n")  # line 2
 
     notes = extract_notes()
 
@@ -61,7 +61,7 @@ def test_extract_notes_gets_stripped_line():
     create_config()
 
     with open("example.py", "w") as f:
-        f.write("x = 1
+        f.write("x = 1  # GN: my note\n")
 
     notes = extract_notes()
 
@@ -78,7 +78,7 @@ def test_extract_notes_ignores_unsupported_files():
     create_config()
 
     with open("notes.txt", "w") as f:
-        f.write("hello
+        f.write("hello # GN: should be ignored\n")
 
     notes = extract_notes()
 
@@ -95,7 +95,7 @@ def test_extract_notes_skips_hidden_dirs():
     create_config()
 
     with open(os.path.join(".git", "test.py"), "w") as f:
-        f.write("x = 1
+        f.write("x = 1  # GN: hidden note\n")
 
     notes = extract_notes()
 
@@ -112,9 +112,9 @@ def test_extract_notes_finds_multiple_notes():
     create_config()
 
     with open("example.py", "w") as f:
-        f.write("x = 1
+        f.write("x = 1  # GN: first note\n")
         f.write("y = 2\n")
-        f.write("z = 3
+        f.write("z = 3  # GN: second note\n")
 
     notes = extract_notes()
 
@@ -131,7 +131,7 @@ def test_strip_working_tree_removes_notes():
     create_config()
 
     with open("example.py", "w") as f:
-        f.write("x = 1
+        f.write("x = 1  # GN: my note\n")
         f.write("y = 2\n")
 
     notes = extract_notes()
@@ -156,7 +156,7 @@ def test_strip_working_tree_keeps_other_lines():
 
     with open("example.py", "w") as f:
         f.write("# a normal comment\n")
-        f.write("x = 1
+        f.write("x = 1  # GN: remove me\n")
         f.write("y = 2  # regular comment\n")
 
     notes = extract_notes()
@@ -182,7 +182,7 @@ def test_reapply_notes_restores_notes():
     config.read(".ghostnotes")
 
     with open("example.py", "w") as f:
-        f.write("x = 1
+        f.write("x = 1  # GN: my note\n")
         f.write("y = 2\n")
 
     notes = extract_notes()
@@ -193,7 +193,7 @@ def test_reapply_notes_restores_notes():
         content = f.read()
 
     # the note should be back
-    assert "
+    assert "# GN: my note" in content
     assert "x = 1" in content
 
     os.chdir(original_dir)
@@ -209,7 +209,7 @@ def test_reapply_notes_handles_shifted_lines():
     config.read(".ghostnotes")
 
     with open("example.py", "w") as f:
-        f.write("x = 1
+        f.write("x = 1  # GN: my note\n")
 
     notes = extract_notes()
     strip_working_tree(notes)
@@ -225,7 +225,7 @@ def test_reapply_notes_handles_shifted_lines():
     with open("example.py", "r") as f:
         content = f.read()
 
-    assert "
+    assert "# GN: my note" in content
 
     os.chdir(original_dir)
 
@@ -240,7 +240,7 @@ def test_reapply_notes_reports_orphaned(capsys):
     config.read(".ghostnotes")
 
     with open("example.py", "w") as f:
-        f.write("x = 1
+        f.write("x = 1  # GN: my note\n")
 
     notes = extract_notes()
 
@@ -266,7 +266,7 @@ def test_reapply_notes_reports_deleted_file(capsys):
     config.read(".ghostnotes")
 
     with open("example.py", "w") as f:
-        f.write("x = 1
+        f.write("x = 1  # GN: my note\n")
 
     notes = extract_notes()
 

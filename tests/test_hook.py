@@ -125,7 +125,7 @@ def test_strip_removes_ghost_note_from_index(): # crucial
     # create a python file with a ghost note comment
     with open("example.py", "w") as f:
         f.write("x = 1\n")
-        f.write("y = 2
+        f.write("y = 2  # GN: this is a ghost note\n")
         f.write("z = 3\n")
 
     # stage the file (add it to the git index)
@@ -157,7 +157,7 @@ def test_strip_leaves_non_tagged_comments(): # crucial
 
     with open("example.py", "w") as f:
         f.write("# this is a normal comment\n")
-        f.write("x = 1
+        f.write("x = 1  # GN: ghost note to remove\n")
         f.write("y = 2  # regular inline comment\n")
 
     subprocess.run(["git", "add", "example.py"], capture_output=True)
@@ -185,7 +185,7 @@ def test_strip_ignores_unsupported_files():
     create_config()
 
     with open("notes.txt", "w") as f:
-        f.write("some text
+        f.write("some text # GN: this should stay\n")
 
     subprocess.run(["git", "add", "notes.txt"], capture_output=True)
 
@@ -196,7 +196,7 @@ def test_strip_ignores_unsupported_files():
         capture_output=True, text=True
     )
 
-    assert "
+    assert "# GN: this should stay" in result.stdout
 
     os.chdir(original_dir)
 
