@@ -43,3 +43,36 @@ Your local file stays untouched.
 | `ghostnotes set-tag --tag <tag>` | Change the default comment tag |
 | `ghostnotes add-lang --ext <.ext> --symb <symbol>` | Add support for a new language |
 | `ghostnotes pull` | Git pull that safely strips and re-applies your ghostnotes |
+
+---
+
+## Supported Languages
+
+| Language | Extension | Comment Symbol |
+|---|---|---|
+| Python | `.py` | `#` |
+| Java | `.java` | `//` |
+| JavaScript | `.js` | `//` |
+| TypeScript | `.ts` | `//` |
+| C | `.c` | `//` |
+| C++ | `.cpp` | `//` |
+| C# | `.cs` | `//` |
+| Go | `.go` | `//` |
+| Rust | `.rs` | `//` |
+| Swift | `.swift` | `//` |
+| Kotlin | `.kt` | `//` |
+| Ruby | `.rb` | `#` |
+| Shell | `.sh` | `#` |
+| YAML | `.yaml` / `.yml` | `#` |
+| R | `.r` | `#` |
+| PHP | `.php` | `//` |
+| Lua | `.lua` | `--` |
+| SQL | `.sql` | `--` |
+| Scala | `.scala` | `//` |
+| Dart | `.dart` | `//` |
+| Zig | `.zig` | `//` |
+| Perl | `.pl` | `#` |
+| Elixir | `.ex` | `#` |
+| Haskell | `.hs` | `--` |
+
+Need a language not listed? Add it with `ghostnotes add-lang --ext <.ext> --symb <symbol>`.

@@ -11,7 +11,33 @@ def create_config():
         # set-up the default config
         config = configparser.ConfigParser()
         config['settings'] = {'tag': 'GN:'}
-        config['languages'] = {'.py': '#', '.java': '//', '.js': '//', '.ts': '//'}
+        config['languages'] = {
+            '.py': '#',
+            '.java': '//',
+            '.js': '//',
+            '.ts': '//',
+            '.c': '//',
+            '.cpp': '//',
+            '.cs': '//',
+            '.go': '//',
+            '.rs': '//',
+            '.swift': '//',
+            '.kt': '//',
+            '.rb': '#',
+            '.sh': '#',
+            '.yaml': '#',
+            '.yml': '#',
+            '.r': '#',
+            '.php': '//',
+            '.lua': '--',
+            '.sql': '--',
+            '.scala': '//',
+            '.dart': '//',
+            '.zig': '//',
+            '.pl': '#',
+            '.ex': '#',
+            '.hs': '--',
+        }
 
         with open('.ghostnotes', 'w') as configfile:
             config.write(configfile)
