@@ -1,5 +1,5 @@
 # GhostNotes
-**Version:** 0.2.0 | **Last Updated:** April 4, 2026
+**Version:** 0.2.0 | **Last Updated:** April 12, 2026
 
 A Git tool that strips tagged comments before committing.
 

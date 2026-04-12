@@ -37,6 +37,10 @@ def strip_ghostnotes():
     # read config
     configuration = load_config()
 
+    if configuration is None:
+        print("Ghostnotes is not configured.")
+        return
+
     # get the list of staged file:
     res = subprocess.run(['git', 'diff', '--name-only', '--cached'], capture_output=True, text=True)
     staged_files = res.stdout.splitlines()
@@ -48,7 +52,7 @@ def strip_ghostnotes():
             supported_staged_files.append(f)
 
     # strip lines matching the tag
-    # TODO: split has a subtle issue even for exact matching. What if the tag appears inside a string literal in the code, like: message = "use GN: prefix for notes"
+
 
     for file in supported_staged_files:
         # check the commenting style for the file type from configuration['languages'] as well as the tag from configuration['settings'] to build the exact sequence of chars we are looking for
