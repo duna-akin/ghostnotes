@@ -2,6 +2,25 @@
 import configparser
 import os
 
+
+def get_patterns(comment, tag, space_mode):
+    if space_mode == 'nospace':
+        return [comment + tag]
+    if space_mode == 'both':
+        return [comment + ' ' + tag, comment + tag]
+    return [comment + ' ' + tag]
+
+
+def find_pattern(line, patterns):
+    best_idx = None
+    best_pattern = None
+    for p in patterns:
+        idx = line.find(p)
+        if idx != -1 and (best_idx is None or idx < best_idx):
+            best_idx = idx
+            best_pattern = p
+    return best_idx, best_pattern
+
 def create_config():
     if not os.path.isdir('.git'):
         print("This project is not initialized with git. GhostNotes only works for directories already initialized with git.")
@@ -10,7 +29,7 @@ def create_config():
     else:
         # set-up the default config
         config = configparser.ConfigParser()
-        config['settings'] = {'tag': 'GN:'}
+        config['settings'] = {'tag': 'GN:', 'space_mode': 'space'}
         config['languages'] = {
             '.py': '#',
             '.java': '//',

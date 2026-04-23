@@ -2,7 +2,7 @@ import os
 import stat
 import subprocess
 from pathlib import Path 
-from ghostnotes.config import load_config
+from ghostnotes.config import load_config, get_patterns, find_pattern
 
 # for adding this script to pre-commit
 def install_hook():
@@ -53,10 +53,11 @@ def strip_ghostnotes():
 
     # strip lines matching the tag
     for file in supported_staged_files:
-        # check the commenting style for the file type from configuration['languages'] as well as the tag from configuration['settings'] to build the exact sequence of chars we are looking for
+        # build the set of candidate patterns based on space_mode
         comment = configuration['languages'][Path(file).suffix]
         tag = configuration['settings']['tag']
-        pattern = comment + ' ' + tag
+        space_mode = configuration['settings'].get('space_mode', 'space')
+        patterns = get_patterns(comment, tag, space_mode)
 
         # read the staged version from the git index, not the working tree
         staged_content = subprocess.run(
@@ -66,9 +67,9 @@ def strip_ghostnotes():
 
         new_lines = list()
         for line in staged_content.splitlines(keepends=True):
+            idx, _ = find_pattern(line, patterns)
             # strip only if the pattern is not inside a string literal
-            if pattern in line:
-                idx = line.index(pattern)
+            if idx is not None:
                 prefix = line[:idx]
                 # if an odd number of quotes precede the pattern, it's inside a string
                 in_string = (prefix.count('"') % 2 == 1) or (prefix.count("'") % 2 == 1)

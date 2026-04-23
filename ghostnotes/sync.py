@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from ghostnotes.config import load_config
+from ghostnotes.config import load_config, get_patterns, find_pattern
 
 
 def extract_notes():
@@ -21,20 +21,24 @@ def extract_notes():
 
         comment = config['languages'][ext]
         tag = config['settings']['tag']
-        pattern = comment + ' ' + tag
+        space_mode = config['settings'].get('space_mode', 'space')
+        patterns = get_patterns(comment, tag, space_mode)
 
         # extract notes, store code without comment, store comment, and store line num
         file_notes = []
         try:
             with open(file, 'r') as f:
                 for i, line in enumerate(f):
-                    if pattern in line:
-                        stripped = line.split(pattern)[0].rstrip()
-                        note_text = line.split(pattern, 1)[1].strip()
+                    idx, matched = find_pattern(line, patterns)
+                    if idx is not None:
+                        stripped = line[:idx].rstrip()
+                        note_text = line[idx + len(matched):].strip()
                         file_notes.append({
                             'stripped_line': stripped,
                             'note': note_text,
                             'line_number': i,
+                            # preserve the exact prefix (e.g. '# GN:' vs '#GN:') so reapply_notes can restore it verbatim in 'both' mode
+                            'pattern': matched,
                         })
         except UnicodeDecodeError:
             continue
@@ -59,16 +63,12 @@ def strip_working_tree(notes):
             f.writelines(lines)
 
 
-def reapply_notes(notes, config):
+def reapply_notes(notes):
     for file, file_notes in notes.items():
         if not Path(file).is_file():
             for n in file_notes:
                 print(f"  ORPHANED (file deleted): {file} — {n['note']}")
             continue
-
-        comment = config['languages'][Path(file).suffix]
-        tag = config['settings']['tag']
-        pattern = comment + ' ' + tag
 
         with open(file, 'r') as f:
             lines = f.readlines()
@@ -78,6 +78,7 @@ def reapply_notes(notes, config):
         for n in file_notes:
             target = n['stripped_line']
             line_num = n['line_number']
+            pattern = n['pattern']
             matched = False
 
             # 1. exact match at same line number
@@ -115,7 +116,6 @@ def reapply_notes(notes, config):
 
 
 def pull():
-    config = load_config()
     notes = extract_notes()
 
     if notes:
@@ -130,11 +130,11 @@ def pull():
     if notes:
         if result.returncode != 0:
             print("GhostNotes: Pull failed, restoring notes to working tree...")
-            reapply_notes(notes, config)
+            reapply_notes(notes)
             print("GhostNotes: Notes restored. Resolve the pull issue and try again.")
         else:
             print("GhostNotes: Re-applying notes...")
-            reapply_notes(notes, config)
+            reapply_notes(notes)
             print("GhostNotes: Done.")
 
     return result.returncode

@@ -187,7 +187,7 @@ def test_reapply_notes_restores_notes():
 
     notes = extract_notes()
     strip_working_tree(notes)
-    reapply_notes(notes, config)
+    reapply_notes(notes)
 
     with open("example.py", "r") as f:
         content = f.read()
@@ -220,7 +220,7 @@ def test_reapply_notes_handles_shifted_lines():
     with open("example.py", "w") as f:
         f.writelines(lines)
 
-    reapply_notes(notes, config)
+    reapply_notes(notes)
 
     with open("example.py", "r") as f:
         content = f.read()
@@ -247,7 +247,7 @@ def test_reapply_notes_reports_orphaned(capsys):
     with open("example.py", "w") as f:
         f.write("totally_different = True\n")
 
-    reapply_notes(notes, config)
+    reapply_notes(notes)
 
     captured = capsys.readouterr()
     assert "ORPHANED" in captured.out
@@ -273,7 +273,7 @@ def test_reapply_notes_reports_deleted_file(capsys):
     # delete the file entirely
     os.remove("example.py")
 
-    reapply_notes(notes, config)
+    reapply_notes(notes)
 
     captured = capsys.readouterr()
     assert "ORPHANED" in captured.out

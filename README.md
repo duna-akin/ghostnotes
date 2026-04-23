@@ -1,5 +1,5 @@
 # GhostNotes
-**Version:** 1.0.1 | **Last Updated:** April 12, 2026
+**Version:** 1.0.2 | **Last Updated:** April 23, 2026
 
 A Git tool that strips tagged comments before committing.
 
@@ -23,7 +23,7 @@ ghostnotes init
 ## What it does
 GhostNotes lets you leave personal notes in your code using a tag (default: `GN:`). Before every commit, it automatically strips them out so they never reach your repository.
 ```python
-x = some_function() # GN: this breaks when input is negative, fix later
+x = some_function() # GN: this is how you assign the output from a function in Python (embarrassing to not know)
 ```
 This comment line gets stripped before the commit so it looks like:
 ```python
@@ -43,6 +43,18 @@ Your local file stays untouched.
 | `ghostnotes set-tag --tag <tag>` | Change the default comment tag |
 | `ghostnotes add-lang --ext <.ext> --symb <symbol>` | Add support for a new language |
 | `ghostnotes pull` | Git pull that safely strips and re-applies your ghostnotes |
+
+---
+
+## Configuration
+
+Edit `.ghostnotes` to tune how notes are detected. Under `[settings]`, `space_mode` controls the spacing between the comment symbol and the tag:
+
+| Mode | Matches |
+|---|---|
+| `space` (default) | `# GN:` only |
+| `nospace` | `#GN:` only |
+| `both` | `# GN:` and `#GN:` |
 
 ---
 
