@@ -1,30 +1,33 @@
 import os
 import stat
-import sys
 import subprocess
+import sys
 from pathlib import Path
-from ghostnotes.config import load_config, get_patterns, find_pattern_outside_string
+
+from ghostnotes.config import find_pattern_outside_string, get_patterns, load_config
+
 
 # for adding this script to pre-commit
 def install_hook():
-    path = '.git/hooks/pre-commit'
-    command = 'python3 -m ghostnotes.hook'
+    path = ".git/hooks/pre-commit"
+    command = "python3 -m ghostnotes.hook"
 
     # if a pre-commit hook file already exists:
     if os.path.exists(path):
-        with open(path, 'r') as file:
+        with open(path, "r") as file:
             for line in file:
                 if line.strip() == command:
                     return
-            
-        with open(path, 'a') as file:
-            file.write(f'\n{command}\n')
+
+        with open(path, "a") as file:
+            file.write(f"\n{command}\n")
     else:
-        with open(path, 'w') as file:
-            file.write(f'#!/bin/bash\n{command}\n')
+        with open(path, "w") as file:
+            file.write(f"#!/bin/bash\n{command}\n")
 
     # make the file executable
     os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
+
 
 # main logic function for stripping the committed files of the keyworded comments
 def strip_ghostnotes():
@@ -49,49 +52,51 @@ def strip_ghostnotes():
         sys.exit(1)
 
     # get the list of staged file:
-    res = subprocess.run(['git', 'diff', '--name-only', '--cached'], capture_output=True, text=True)
+    res = subprocess.run(
+        ["git", "diff", "--name-only", "--cached"], capture_output=True, text=True
+    )
     staged_files = res.stdout.splitlines()
     supported_staged_files = list()
 
     # filter staged_files to only supported file types
     for f in staged_files:
-        if Path(f).suffix in configuration['languages']:
+        if Path(f).suffix in configuration["languages"]:
             supported_staged_files.append(f)
 
     # strip lines matching the tag
     for file in supported_staged_files:
         # build the set of candidate patterns based on space_mode
-        comment = configuration['languages'][Path(file).suffix]
-        tag = configuration['settings']['tag']
-        space_mode = configuration['settings'].get('space_mode', 'space')
+        comment = configuration["languages"][Path(file).suffix]
+        tag = configuration["settings"]["tag"]
+        space_mode = configuration["settings"].get("space_mode", "space")
         patterns = get_patterns(comment, tag, space_mode)
 
         # read the staged version from the git index, not the working tree
         staged_content = subprocess.run(
-            ['git', 'show', f':{file}'],
-            capture_output=True, text=True
+            ["git", "show", f":{file}"], capture_output=True, text=True
         ).stdout
 
         new_lines = list()
         for line in staged_content.splitlines(keepends=True):
             idx, _ = find_pattern_outside_string(line, patterns)
             if idx is not None:
-                line = line[:idx].rstrip() + '\n'
+                line = line[:idx].rstrip() + "\n"
             new_lines.append(line)
 
-        stripped_content = ''.join(new_lines)
+        stripped_content = "".join(new_lines)
 
         # write the stripped content back into the git index only
         hash_result = subprocess.run(
-            ['git', 'hash-object', '-w', '--stdin'],
-            input=stripped_content, capture_output=True, text=True
+            ["git", "hash-object", "-w", "--stdin"],
+            input=stripped_content,
+            capture_output=True,
+            text=True,
         )
         blob_hash = hash_result.stdout.strip()
 
         # get the file's mode from the index
         ls_result = subprocess.run(
-            ['git', 'ls-files', '--stage', file],
-            capture_output=True, text=True
+            ["git", "ls-files", "--stage", file], capture_output=True, text=True
         )
         if not ls_result.stdout.strip():
             continue
@@ -99,8 +104,9 @@ def strip_ghostnotes():
 
         # update the index entry with the new blob
         subprocess.run(
-            ['git', 'update-index', '--cacheinfo', f'{mode},{blob_hash},{file}']
+            ["git", "update-index", "--cacheinfo", f"{mode},{blob_hash},{file}"]
         )
+
 
 if __name__ == "__main__":
     strip_ghostnotes()
