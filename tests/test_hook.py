@@ -2,6 +2,9 @@ import os
 import stat
 import tempfile
 import subprocess
+
+import pytest
+
 from ghostnotes.hook import install_hook, strip_ghostnotes
 from ghostnotes.config import create_config
 
@@ -197,6 +200,21 @@ def test_strip_ignores_unsupported_files():
     )
 
     assert "# GN: this should stay" in result.stdout
+
+    os.chdir(original_dir)
+
+
+def test_strip_exits_nonzero_when_config_missing():
+    """A hook with no config would silently let tagged notes through. It must
+    fail the commit instead."""
+    tmp = make_real_git_repo()
+    original_dir = os.getcwd()
+    os.chdir(tmp)
+
+    # deliberately skip create_config() — .ghostnotes does not exist
+    with pytest.raises(SystemExit) as exc_info:
+        strip_ghostnotes()
+    assert exc_info.value.code == 1
 
     os.chdir(original_dir)
 

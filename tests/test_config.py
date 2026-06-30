@@ -2,12 +2,15 @@ import os
 import tempfile
 import configparser
 
+import pytest
+
 from ghostnotes.config import (
     create_config,
     load_config,
     set_tag,
     add_lang_support,
     update_exclude,
+    find_pattern_outside_string,
 )
 
 
@@ -220,3 +223,32 @@ def test_update_exclude_no_duplicates():
     assert count == 1
 
     os.chdir(original_dir)
+
+
+# Edge-case table for the string-literal-aware pattern scanner.
+# Every row is a real bug we either fixed or want to lock down.
+@pytest.mark.parametrize("line,expected_idx", [
+    # plain code with a real note — match
+    ('x = 1  # GN: note\n', 7),
+    # leading-only note — match at column 0
+    ('# GN: leading\n', 0),
+    # tab between code and pattern — match
+    ('x = 1\t# GN: tab\n', 6),
+    # pattern inside a double-quoted string — no match
+    ('x = "# GN: in string"\n', None),
+    # pattern inside a single-quoted string — no match
+    ("x = '# GN: in string'\n", None),
+    # backslash-escaped quote inside the string keeps the string open — no match
+    ('x = "esc \\" still # GN: open"\n', None),
+    # closed string followed by a real note — match after the close
+    ('x = "hello"  # GN: real note\n', 13),
+    # apostrophe inside a double-quoted string does not toggle state — match the trailing real note
+    ('x = "it\'s fine"  # GN: real\n', 17),
+    # two patterns on one line, first inside a string — match the second
+    ('x = "# GN: ignored"  # GN: real\n', 21),
+    # pattern appears only inside an unterminated string — no match
+    ('msg = "# GN: only"\n', None),
+])
+def test_find_pattern_outside_string_handles_edge_cases(line, expected_idx):
+    idx, _ = find_pattern_outside_string(line, ['# GN:'])
+    assert idx == expected_idx

@@ -1,6 +1,7 @@
 import os
 import tempfile
 import configparser
+from pathlib import Path
 
 from ghostnotes.config import create_config
 from ghostnotes.sync import extract_notes, strip_working_tree, reapply_notes
@@ -251,6 +252,37 @@ def test_reapply_notes_reports_orphaned(capsys):
 
     captured = capsys.readouterr()
     assert "ORPHANED" in captured.out
+
+    os.chdir(original_dir)
+
+
+def test_extract_strip_reapply_is_lossless():
+    """extract → strip → reapply with no merge in between must be byte-identical.
+    Exercises varied whitespace (single space, multiple spaces, tabs, leading
+    note) so the whitespace-fidelity guarantee is locked down."""
+    tmp = make_project()
+    original_dir = os.getcwd()
+    os.chdir(tmp)
+
+    create_config()
+
+    content = (
+        "x = 1  # GN: two-space sep, one-space post\n"
+        "y = 2\t\t# GN: tab separator\n"
+        "# GN: leading note\n"
+        "w = 4    # GN:    extra spaces post\n"
+        "untouched = True\n"
+    )
+    with open("example.py", "w") as f:
+        f.write(content)
+
+    original_bytes = Path("example.py").read_bytes()
+
+    notes = extract_notes()
+    strip_working_tree(notes)
+    reapply_notes(notes)
+
+    assert Path("example.py").read_bytes() == original_bytes
 
     os.chdir(original_dir)
 
