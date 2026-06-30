@@ -1,8 +1,9 @@
 import os
 import stat
+import sys
 import subprocess
-from pathlib import Path 
-from ghostnotes.config import load_config, get_patterns, find_pattern
+from pathlib import Path
+from ghostnotes.config import load_config, get_patterns, find_pattern_outside_string
 
 # for adding this script to pre-commit
 def install_hook():
@@ -38,8 +39,14 @@ def strip_ghostnotes():
     configuration = load_config()
 
     if configuration is None:
-        print("Ghostnotes is not configured.")
-        return
+        # Fail the commit loud: a hook with no config would silently let
+
+        print(
+            "GhostNotes: .ghostnotes not found. "
+            "Run 'ghostnotes init' or remove the pre-commit hook.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     # get the list of staged file:
     res = subprocess.run(['git', 'diff', '--name-only', '--cached'], capture_output=True, text=True)
@@ -67,14 +74,9 @@ def strip_ghostnotes():
 
         new_lines = list()
         for line in staged_content.splitlines(keepends=True):
-            idx, _ = find_pattern(line, patterns)
-            # strip only if the pattern is not inside a string literal
+            idx, _ = find_pattern_outside_string(line, patterns)
             if idx is not None:
-                prefix = line[:idx]
-                # if an odd number of quotes precede the pattern, it's inside a string
-                in_string = (prefix.count('"') % 2 == 1) or (prefix.count("'") % 2 == 1)
-                if not in_string:
-                    line = line[:idx].rstrip() + '\n'
+                line = line[:idx].rstrip() + '\n'
             new_lines.append(line)
 
         stripped_content = ''.join(new_lines)
