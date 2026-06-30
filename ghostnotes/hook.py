@@ -43,7 +43,7 @@ def strip_ghostnotes():
 
     if configuration is None:
         # Fail the commit loud: a hook with no config would silently let
-
+        # tagged notes through, defeating the whole point of the tool.
         print(
             "GhostNotes: .ghostnotes not found. "
             "Run 'ghostnotes init' or remove the pre-commit hook.",
