@@ -1,10 +1,12 @@
 import subprocess
 from pathlib import Path
-from ghostnotes.config import load_config, get_patterns, find_pattern
+from ghostnotes.config import load_config, get_patterns, find_pattern_outside_string
 
 
 def extract_notes():
     config = load_config()
+    if config is None:
+        return {}
     notes = {}
 
     for file in Path('.').rglob('*'):
@@ -24,21 +26,27 @@ def extract_notes():
         space_mode = config['settings'].get('space_mode', 'space')
         patterns = get_patterns(comment, tag, space_mode)
 
-        # extract notes, store code without comment, store comment, and store line num
         file_notes = []
         try:
             with open(file, 'r') as f:
                 for i, line in enumerate(f):
-                    idx, matched = find_pattern(line, patterns)
+                    idx, matched = find_pattern_outside_string(line, patterns)
                     if idx is not None:
-                        stripped = line[:idx].rstrip()
-                        note_text = line[idx + len(matched):].strip()
+                        prefix = line[:idx]
+                        stripped = prefix.rstrip()
+                        # whitespace between the stripped code and the pattern
+                        pre_pattern_ws = prefix[len(stripped):]
+                        # whitespace between the pattern and the note text
+                        after_pattern = line[idx + len(matched):]
+                        post_pattern_ws = after_pattern[: len(after_pattern) - len(after_pattern.lstrip())]
+                        note_text = after_pattern.strip()
                         file_notes.append({
                             'stripped_line': stripped,
                             'note': note_text,
                             'line_number': i,
-                            # preserve the exact prefix (e.g. '# GN:' vs '#GN:') so reapply_notes can restore it verbatim in 'both' mode
                             'pattern': matched,
+                            'pre_pattern_ws': pre_pattern_ws,
+                            'post_pattern_ws': post_pattern_ws,
                         })
         except UnicodeDecodeError:
             continue
@@ -79,11 +87,14 @@ def reapply_notes(notes):
             target = n['stripped_line']
             line_num = n['line_number']
             pattern = n['pattern']
+            pre_ws = n.get('pre_pattern_ws', ' ')
+            post_ws = n.get('post_pattern_ws', ' ')
+            restored = target + pre_ws + pattern + post_ws + n['note'] + '\n'
             matched = False
 
             # 1. exact match at same line number
             if line_num < len(lines) and lines[line_num].rstrip() == target:
-                lines[line_num] = target + ' ' + pattern + ' ' + n['note'] + '\n'
+                lines[line_num] = restored
                 matched = True
 
             # 2. exact match nearby (within 20 lines)
@@ -92,7 +103,7 @@ def reapply_notes(notes):
                 end = min(len(lines), line_num + 20)
                 for i in range(start, end):
                     if lines[i].rstrip() == target:
-                        lines[i] = target + ' ' + pattern + ' ' + n['note'] + '\n'
+                        lines[i] = restored
                         matched = True
                         break
 
@@ -100,7 +111,7 @@ def reapply_notes(notes):
             if not matched:
                 for i in range(len(lines)):
                     if lines[i].rstrip() == target:
-                        lines[i] = target + ' ' + pattern + ' ' + n['note'] + '\n'
+                        lines[i] = restored
                         matched = True
                         break
 
